@@ -23,6 +23,7 @@ module trader
     output qty_t           qty_o
 );
 
+    qty_t arb_qty;
 
     always_comb begin
         valid_o = '0;
@@ -32,7 +33,7 @@ module trader
         market_o = '0;
 
         if (bid_prices0_i[0] > ask_prices1_i[0]) begin
-            qty_t arb_qty = (bid_qtys0_i[0] < ask_qtys1_i[0]) ? bid_qtys0_i[0] : ask_qtys1_i[0];
+            arb_qty = (bid_qtys0_i[0] < ask_qtys1_i[0]) ? bid_qtys0_i[0] : ask_qtys1_i[0];
 
             // trade 0
             valid_o = '1;
@@ -48,7 +49,7 @@ module trader
             // price_o = ask_prices1_i[0];
             // qty_o = arb_qty;
         end else if (bid_prices1_i[0] > ask_prices0_i[0]) begin
-            qty_t arb_qty =  (bid_qtys1_i[0] < ask_qtys0_i[0]) ? bid_qtys1_i[0] : ask_qtys0_i[0];
+            arb_qty = (bid_qtys1_i[0] < ask_qtys0_i[0]) ? bid_qtys1_i[0] : ask_qtys0_i[0];
 
             // trade 0
             valid_o = '1;

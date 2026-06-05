@@ -45,15 +45,12 @@ module orderbook
     function automatic logic [$clog2(N)-1:0] first(
         input logic [N-1:0] array
     );
-        for (int i = 0; i < N; i++) begin
+        first = 0;
+        for (int i = N-1; i >= 0; i--) begin
             if (array[i])
-                return i;
+                first = i[$clog2(N)-1:0];
         end
-        // $error("leb :p");
-        return 0;
     endfunction
-
-
 
     always_comb begin
         prices_t prices_q;
