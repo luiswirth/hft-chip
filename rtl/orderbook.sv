@@ -71,6 +71,7 @@ module orderbook
         logic[$clog2(N)-1:0] eq_idx;
         logic[$clog2(N)-1:0] cmp_idx;
         logic pre_error;
+        logic onehot;
         
         bid_prices_d = bid_prices_q;
         bid_qtys_d = bid_qtys_q;
@@ -95,7 +96,8 @@ module orderbook
             eq_idx = first(equals);
 
 
-            pre_error = (qty_i == 0) || (any_eq && !$onehot(equals));
+            onehot = (equals & (equals - 1)) == 0;
+        pre_error = (qty_i == 0) || (any_eq && !onehot);
 
             if (pre_error) begin
                 error_d = 1'b1;
