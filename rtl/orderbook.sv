@@ -61,10 +61,10 @@ module orderbook
     endfunction
 
     always_comb begin
-        prices_t prices_q;
-        prices_t prices_d;
-        qtys_t qtys_q;
-        qtys_t qtys_d;
+        prices_t cur_prices;
+        prices_t new_prices;
+        qtys_t   cur_qtys;
+        qtys_t   new_qtys;
         logic[N-1:0] compares;
         logic[N-1:0] equals;
         logic any_eq;
@@ -78,18 +78,26 @@ module orderbook
         ask_prices_d = ask_prices_q;
         ask_qtys_d = ask_qtys_q;
 
+        // assign defaults to avoid latches
+        cur_prices = (side_i == Bid) ? bid_prices_q : ask_prices_q;
+        cur_qtys   = (side_i == Bid) ? bid_qtys_q : ask_qtys_q;
+        new_prices = cur_prices;
+        new_qtys   = cur_qtys;
+        equals     = '0;
+        compares   = '0;
+        any_eq     = 1'b0;
+        eq_idx     = '0;
+        cmp_idx    = '0;
+        onehot     = 1'b0;
+        pre_error  = 1'b0;
+
         error_d = error_q;
 
         if (valid_i && !error_q) begin
-            prices_q = (side_i == Bid) ? bid_prices_q : ask_prices_q;
-            qtys_q = (side_i == Bid) ? bid_qtys_q : ask_qtys_q;
 
-            prices_d = prices_q;
-            qtys_d = qtys_q;
-
-            for (int i = 0; i < N; i++) begin 
-                equals[i] = prices_q[i] == price_i;
-                compares[i] = (side_i == Bid) ? (price_i > prices_q[i]) : (price_i < prices_q[i]);
+            for (int i = 0; i < N; i++) begin
+                equals[i] = cur_prices[i] == price_i;
+                compares[i] = (side_i == Bid) ? (price_i > cur_prices[i]) : (price_i < cur_prices[i]);
             end
 
             any_eq = |equals;
@@ -97,7 +105,7 @@ module orderbook
 
 
             onehot = (equals & (equals - 1)) == 0;
-        pre_error = (qty_i == 0) || (any_eq && !onehot);
+            pre_error = (qty_i == 0) || (any_eq && !onehot);
 
             if (pre_error) begin
                 error_d = 1'b1;
@@ -105,32 +113,32 @@ module orderbook
                 unique case (op_i)
                     Insert: if (any_eq) begin
                         // overflow check
-                        if (qty_i > '1 - qtys_q[eq_idx]) begin
+                        if (qty_i > '1 - cur_qtys[eq_idx]) begin
                             error_d = 1'b1;
                         end else begin
-                            qtys_d[eq_idx] = qtys_q[eq_idx] + qty_i;
+                            new_qtys[eq_idx] = cur_qtys[eq_idx] + qty_i;
                         end
                     end else if (|compares) begin
-                        cmp_idx = first(compares); // only call first if we have at least one 
+                        cmp_idx = first(compares); // only call first if we have at least one
                         for (int i = 1; i < N; i++) begin
-                            prices_d[i] = (i > cmp_idx) ? prices_q[i-1] : prices_q[i];
-                            qtys_d[i]   = (i > cmp_idx) ? qtys_q[i-1]   : qtys_q[i];
+                            new_prices[i] = (i > cmp_idx) ? cur_prices[i-1] : cur_prices[i];
+                            new_qtys[i]   = (i > cmp_idx) ? cur_qtys[i-1] : cur_qtys[i];
                         end
-                        prices_d[cmp_idx] = price_i;
-                        qtys_d[cmp_idx]   = qty_i;
+                        new_prices[cmp_idx] = price_i;
+                        new_qtys[cmp_idx]   = qty_i;
                     end else begin
                         error_d = 1'b1;
                     end
-                    Remove: if (any_eq && qtys_q[eq_idx] >= qty_i) begin
-                        if(qtys_q[eq_idx] == qty_i) begin
+                    Remove: if (any_eq && cur_qtys[eq_idx] >= qty_i) begin
+                        if (cur_qtys[eq_idx] == qty_i) begin
                             for (int i = 0; i < N-1; i++) begin
-                                prices_d[i] = (i < eq_idx) ? prices_q[i] : prices_q[i+1];
-                                qtys_d[i]   = (i < eq_idx) ? qtys_q[i]   : qtys_q[i+1];
+                                new_prices[i] = (i < eq_idx) ? cur_prices[i] : cur_prices[i+1];
+                                new_qtys[i]   = (i < eq_idx) ? cur_qtys[i] : cur_qtys[i+1];
                             end
-                            prices_d[N-1] = (side_i == Bid) ? DEFAULT_BID : DEFAULT_ASK;
-                            qtys_d[N-1] = 0; 
+                            new_prices[N-1] = (side_i == Bid) ? DEFAULT_BID : DEFAULT_ASK;
+                            new_qtys[N-1] = 0;
                         end else begin
-                            qtys_d[eq_idx] = qtys_q[eq_idx] - qty_i;
+                            new_qtys[eq_idx] = cur_qtys[eq_idx] - qty_i;
                         end
                     end else begin
                         error_d = 1'b1;
@@ -142,12 +150,12 @@ module orderbook
 
                 unique case (side_i)
                     Bid: begin
-                        bid_prices_d = prices_d;
-                        bid_qtys_d = qtys_d;
+                        bid_prices_d = new_prices;
+                        bid_qtys_d = new_qtys;
                     end
                     Ask: begin
-                        ask_prices_d = prices_d;
-                        ask_qtys_d = qtys_d;
+                        ask_prices_d = new_prices;
+                        ask_qtys_d = new_qtys;
                     end
                     default: begin
                         error_d = 1'b1;
@@ -156,7 +164,7 @@ module orderbook
             end
         end
     end
-
+    
     assign bid_prices_o = bid_prices_q;
     assign bid_qtys_o   = bid_qtys_q;
     assign ask_prices_o = ask_prices_q;
