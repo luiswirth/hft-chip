@@ -4,20 +4,19 @@ module croc_chip import orderbook_pkg::*; #() (
 
   input  wire valid_i,
   input  wire message_type_i,
-  input  wire market_i,
+  input  wire [1:0] market_i,
   input  wire op_i,
   input  wire side_i,
   input  wire [PRICE_WIDTH-1:0] price_i,
   input  wire [QTY_WIDTH-1:0] qty_i,
 
   output wire valid_o,
-  output wire market_o,
+  output wire [1:0] market_o,
   output wire side_o,
   output wire [PRICE_WIDTH-1:0] price_o,
   output wire [QTY_WIDTH-1:0] qty_o,
 
   output wire error_o,
-  output wire spare0_o,
 
   inout wire VDD,
   inout wire VSS,
@@ -30,26 +29,27 @@ module croc_chip import orderbook_pkg::*; #() (
 
   wire in_valid;
   wire in_message_type;
-  wire in_market;
+  wire [1:0] in_market;
   wire in_op;
   wire in_side;
   wire [PRICE_WIDTH-1:0] in_price;
   wire [QTY_WIDTH-1:0] in_qty;
   
   wire out_valid;
-  wire out_market;
+  wire [1:0] out_market;
   wire out_side;
   wire [PRICE_WIDTH-1:0] out_price;
   wire [QTY_WIDTH-1:0] out_qty;
 
-  wire out_error, out_spare0;
+  wire out_error;
 
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_clk_i  (.pad(clk_i),  .p2c(clk));
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_rst_ni (.pad(rst_ni), .p2c(rst_n));
 
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_valid_i      (.pad(valid_i), .p2c(in_valid));
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_message_type_i (.pad(message_type_i), .p2c(in_message_type));
-  (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_market_i     (.pad(market_i), .p2c(in_market));
+  (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_market0_i     (.pad(market_i[0]), .p2c(in_market[0]));
+  (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_market1_i   (.pad(market_i[1]), .p2c(in_market[1]));
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_op_i         (.pad(op_i), .p2c(in_op));
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_side_i       (.pad(side_i), .p2c(in_side));
 
@@ -62,7 +62,7 @@ module croc_chip import orderbook_pkg::*; #() (
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_price6_i  (.pad(price_i[6]),  .p2c(in_price[6]));
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_price7_i  (.pad(price_i[7]),  .p2c(in_price[7]));
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_price8_i  (.pad(price_i[8]),  .p2c(in_price[8]));
-  (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_price9_i  (.pad(price_i[9]),  .p2c(in_price[9]));
+  // (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_price9_i  (.pad(price_i[9]),  .p2c(in_price[9]));
 
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_qty0_i (.pad(qty_i[0]), .p2c(in_qty[0]));
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_qty1_i (.pad(qty_i[1]), .p2c(in_qty[1]));
@@ -74,7 +74,8 @@ module croc_chip import orderbook_pkg::*; #() (
   (* dont_touch = "true" *) sg13cmos5l_IOPadIn pad_qty7_i (.pad(qty_i[7]), .p2c(in_qty[7]));
 
   (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_valid_o  (.pad(valid_o),  .c2p(out_valid));
-  (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_market_o (.pad(market_o), .c2p(out_market));
+  (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_market0_o (.pad(market_o[0]), .c2p(out_market[1]));
+  (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_market1_o (.pad(market_o[1]), .c2p(out_market[1]));
   (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_side_o   (.pad(side_o),  .c2p(out_side));
   
   (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_price0_o  (.pad(price_o[0]),  .c2p(out_price[0]));
@@ -86,7 +87,7 @@ module croc_chip import orderbook_pkg::*; #() (
   (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_price6_o  (.pad(price_o[6]),  .c2p(out_price[6]));
   (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_price7_o  (.pad(price_o[7]),  .c2p(out_price[7]));
   (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_price8_o  (.pad(price_o[8]),  .c2p(out_price[8]));
-  (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_price9_o  (.pad(price_o[9]),  .c2p(out_price[9]));
+  // (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_price9_o  (.pad(price_o[9]),  .c2p(out_price[9]));
 
   (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_qty0_o (.pad(qty_o[0]), .c2p(out_qty[0]));
   (* dont_touch = "true" *) sg13cmos5l_IOPadOut16mA pad_qty1_o (.pad(qty_o[1]), .c2p(out_qty[1]));
@@ -135,23 +136,37 @@ module croc_chip import orderbook_pkg::*; #() (
   price_t [N-1:0] ask_prices1;
   qty_t   [N-1:0] ask_qtys1;
 
-  logic error0;
-  logic error1;
-  logic error2;
+  price_t [N-1:0] bid_prices2;
+  qty_t   [N-1:0] bid_qtys2;
+  price_t [N-1:0] ask_prices2;
+  qty_t   [N-1:0] ask_qtys2;
+
+
+  price_t [N-1:0] bid_prices3;
+  qty_t   [N-1:0] bid_qtys3;
+  price_t [N-1:0] ask_prices3;
+  qty_t   [N-1:0] ask_qtys3;
+
+  logic error0, error1, error2, error3, error4, error5, error6, error7;
+
 
   logic valid0;
   logic valid1;
-  logic valid2;
 
-  assign valid0 = in_valid & (msg_type_t'(in_message_type) == Public) & (in_market == 1'b0);
-  assign valid1 = in_valid & (msg_type_t'(in_message_type) == Public) & (in_market == 1'b1);
-  assign valid2 = in_valid & (msg_type_t'(in_message_type) == Private);
+  assign valid_ob0 = in_valid & (msg_type_t'(in_message_type) == Public) & (in_market == 0);
+  assign valid_ob1 = in_valid & (msg_type_t'(in_message_type) == Public) & (in_market == 1);
+  assign valid_ob2 = in_valid & (msg_type_t'(in_message_type) == Public) & (in_market == 2);
+  assign valid_ob3 = in_valid & (msg_type_t'(in_message_type) == Public) & (in_market == 3);
+
+  assign valid_trader0 = in_valid & (msg_type_t'(in_message_type) == Private) & (in_market < 2);
+  assign valid_trader1 = in_valid & (msg_type_t'(in_message_type) == Private) & (in_market < 2);
+  assign valid_trader2 = in_valid & (msg_type_t'(in_message_type) == Private) & (in_market < 2);
 
   orderbook #(.N(N)) orderbook0_i (
     .clk_i        (clk),
     .rst_ni       (rst_n),
 
-    .valid_i      (valid0),
+    .valid_i      (valid_ob0),
     .op_i         (op_t'(in_op)),
     .side_i       (side_t'(in_side)),
     .price_i      (in_price),
@@ -169,7 +184,7 @@ module croc_chip import orderbook_pkg::*; #() (
     .clk_i        (clk),
     .rst_ni       (rst_n),
 
-    .valid_i      (valid1),
+    .valid_i      (valid_ob1),
     .op_i         (op_t'(in_op)),
     .side_i       (side_t'(in_side)),
     .price_i      (in_price),
@@ -183,7 +198,43 @@ module croc_chip import orderbook_pkg::*; #() (
     .error_o      (error1)
   );
 
-  trader #(.N(N)) trader_i (
+  orderbook #(.N(N)) orderbook2_i (
+    .clk_i        (clk),
+    .rst_ni       (rst_n),
+
+    .valid_i      (valid_ob2),
+    .op_i         (op_t'(in_op)),
+    .side_i       (side_t'(in_side)),
+    .price_i      (in_price),
+    .qty_i        (in_qty),
+
+    .bid_prices_o (bid_prices2),
+    .bid_qtys_o   (bid_qtys2),
+    .ask_prices_o (ask_prices2),
+    .ask_qtys_o   (ask_qtys2),
+
+    .error_o      (error2)
+  );
+
+  orderbook #(.N(N)) orderbook3_i (
+    .clk_i        (clk),
+    .rst_ni       (rst_n),
+
+    .valid_i      (valid_ob3),
+    .op_i         (op_t'(in_op)),
+    .side_i       (side_t'(in_side)),
+    .price_i      (in_price),
+    .qty_i        (in_qty),
+
+    .bid_prices_o (bid_prices3),
+    .bid_qtys_o   (bid_qtys3),
+    .ask_prices_o (ask_prices3),
+    .ask_qtys_o   (ask_qtys3),
+
+    .error_o      (error3)
+  );
+
+  arb_trader #(.N(N)) arb_trader_i (
     .clk_i        (clk),
     .rst_ni       (rst_n),
 
@@ -197,7 +248,7 @@ module croc_chip import orderbook_pkg::*; #() (
     .ask_prices1_i (ask_prices1),
     .ask_qtys1_i   (ask_qtys1),
 
-    .order_filled_i (valid2),
+    .order_filled_i (valid_trader0),
     .filled_price_i (in_price),
     .filled_qty_i   (in_qty),
     .filled_side_i  (side_t'(in_side)),
@@ -207,8 +258,7 @@ module croc_chip import orderbook_pkg::*; #() (
     .side_o   (out_side),
     .price_o  (out_price),
     .qty_o    (out_qty),
-    .error_o  (error2)
-
+    .error_o  (error4)
   );
 
 endmodule

@@ -1,5 +1,5 @@
 package orderbook_pkg;
-    localparam int unsigned PRICE_WIDTH = 10;
+    localparam int unsigned PRICE_WIDTH = 9;
     localparam int unsigned QTY_WIDTH   = 8;
     typedef logic [PRICE_WIDTH-1:0] price_t;
     typedef logic [QTY_WIDTH-1:0]   qty_t;
