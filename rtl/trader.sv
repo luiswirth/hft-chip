@@ -21,7 +21,7 @@ module trader
 
     // private order feed
     input logic            order_filled_i,
-    input price_t          filled_average_price_i, // ununsed
+    input price_t          filled_price_i, // ununsed (average price if over multiple levels)
     input qty_t            filled_qty_i,
     input side_t           filled_side_i,
 

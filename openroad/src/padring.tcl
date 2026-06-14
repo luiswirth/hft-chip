@@ -110,7 +110,7 @@ place_pad -row IO_NORTH -location [expr {$northStart -  8*$northPitch}] "pad_pri
 place_pad -row IO_NORTH -location [expr {$northStart -  9*$northPitch}] "pad_price7_o"
 place_pad -row IO_NORTH -location [expr {$northStart - 10*$northPitch}] "pad_price8_o"
 place_pad -row IO_NORTH -location [expr {$northStart - 11*$northPitch}] "pad_price9_o"
-place_pad -row IO_NORTH -location [expr {$northStart - 12*$northPitch}] "pad_spare0_o"
+place_pad -row IO_NORTH -location [expr {$northStart - 12*$northPitch}] "pad_message_type_i"
 place_pad -row IO_NORTH -location [expr {$northStart - 13*$northPitch}] "pad_spare1_o"
 place_pad -row IO_NORTH -location [expr {$northStart - 14*$northPitch}] "pad_vss3"
 place_pad -row IO_NORTH -location [expr {$northStart - 15*$northPitch}] "pad_vdd3"
