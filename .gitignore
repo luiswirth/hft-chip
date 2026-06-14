@@ -1,4 +1,5 @@
 # .gitignore files for cockpit 
+.DS_Store
 
 # all
 *.20[0-9]*-[0-9]*-[0-9]*-[0-9]*:[0-9]*:[0-9]*
